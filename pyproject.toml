@@ -1,0 +1,29 @@
+[project]
+name = "my-fastapi-base"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "ngocquyen2611",email = "ngocquyenvu2611@gmail.com"}
+]
+requires-python = "^3.13"
+dependencies = [
+    "fastapi[standard] (>=0.141.1,<0.142.0)",
+    "pydantic-settings (>=2.14.2,<3.0.0)",
+    "python-dotenv (>=1.2.2,<2.0.0)",
+    "sqlalchemy (>=2.0.51,<3.0.0)",
+    "psycopg2-binary (>=2.9.12,<3.0.0)",
+    "uvicorn[standard] (>=0.52.1,<0.53.0)",
+    "alembic (>=1.19.0,<2.0.0)"
+]
+
+
+[tool.poetry]
+package-mode = false
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+
+[tool.fastapi]
+entrypoint = "src.main:app"
