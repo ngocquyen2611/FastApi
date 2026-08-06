@@ -1,13 +1,13 @@
+import os
 import sys
 from logging.config import fileConfig
 from pathlib import Path
 
-from sqlalchemy import engine_from_config, pool
 from alembic import context
+from sqlalchemy import engine_from_config, pool
 
 # =========================================================================
 # 1. FIX PATH: Thêm thư mục gốc dự án vào sys.path
-# Giúp Python/Alembic tìm thấy thư mục 'src' khi env.py nằm trong 'src/alembic'
 # =========================================================================
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(BASE_DIR))
@@ -15,12 +15,11 @@ sys.path.insert(0, str(BASE_DIR))
 # =========================================================================
 # 2. IMPORT CÁC MODULE TỪ DỰ ÁN FASTAPI
 # =========================================================================
-from src.core.database import Base
 from src.core.config import settings
+from src.core.database import Base
 
-# ⚠️ Import module model để Alembic nhận diện bảng khi chạy autogenerate
-import src.models.base
-
+# Import model để Alembic nhận diện bảng khi autogenerate
+import src.models.base  # noqa: F401
 
 # Alembic Config object
 config = context.config
@@ -32,10 +31,10 @@ if config.config_file_name is not None:
 # =========================================================================
 # 3. CẤU HÌNH DATABASE URL VÀ METADATA
 # =========================================================================
-# Ép Alembic đọc DATABASE_URL từ file .env thông qua settings
-config.set_main_option("sqlalchemy.url", settings.database_url)
+# Ép Alembic chuyển +asyncpg thành +psycopg2 vì Alembic Migration chạy Sync
+db_url = settings.database_url.replace("+asyncpg", "+psycopg2")
+config.set_main_option("sqlalchemy.url", db_url)
 
-# Chỉ định Metadata để Alembic tự động so sánh code Python với DB
 target_metadata = Base.metadata
 
 
@@ -56,7 +55,8 @@ def run_migrations_offline() -> None:
 def run_migrations_online() -> None:
     """Run migrations in 'online' mode."""
     configuration = config.get_section(config.config_ini_section, {})
-    configuration["sqlalchemy.url"] = settings.database_url
+    # Đảm bảo dùng db_url chuẩn sync
+    configuration["sqlalchemy.url"] = db_url
 
     connectable = engine_from_config(
         configuration,
