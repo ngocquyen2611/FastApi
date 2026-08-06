@@ -1,7 +1,7 @@
 """add models
 
 Revision ID: 9c26ebe7045e
-Revises: 810cb7b2b9de
+Revises: 972ff4495b71
 Create Date: 2026-08-06 14:30:36.424141
 
 """
@@ -13,7 +13,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision: str = '9c26ebe7045e'
-down_revision: Union[str, Sequence[str], None] = '810cb7b2b9de'
+down_revision: Union[str, Sequence[str], None] = '972ff4495b71'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

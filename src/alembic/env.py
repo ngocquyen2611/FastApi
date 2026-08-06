@@ -19,7 +19,7 @@ from src.core.config import settings
 from src.core.database import Base
 
 # Import model để Alembic nhận diện bảng khi autogenerate
-import src.models.base  # noqa: F401
+import src.models  # noqa: F401
 
 # Alembic Config object
 config = context.config
