@@ -7,6 +7,7 @@ app = FastAPI(title="My FastAPI Base", description="A base template for FastAPI 
 
 init_db()
 
+app.include_router(users.router, prefix="/users", tags=["Users"])
 
 @app.get("/")
 async def root():
