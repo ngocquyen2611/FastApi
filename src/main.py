@@ -4,7 +4,6 @@ from src.api.v1 import users
 from src.core.database import init_db
 
 app = FastAPI(title="My FastAPI Base", description="A base template for FastAPI applications", version="1.0.0")
-app.include_router(users.router, prefix="/api/v1")
 
 init_db()
 
