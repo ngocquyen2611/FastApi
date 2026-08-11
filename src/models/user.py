@@ -10,7 +10,7 @@ class User(Base):
 
     user_id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String, nullable=False)
-    email = Column(String, nullable=False)
+    email = Column(String, nullable=False, unique=True)
 
     # Relationships
     user_detail = relationship("UserDetail", back_populates="user", uselist=False)

@@ -1,5 +1,9 @@
+import subprocess
+import sys
+
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy.orm import declarative_base, sessionmaker
+
 from src.core.config import settings
 
 connect_args = {"check_same_thread": False} if settings.database_url.startswith("sqlite") else {}
@@ -9,7 +13,16 @@ Base = declarative_base()
 
 
 def init_db():
-    Base.metadata.create_all(bind=engine)
+    try:
+        subprocess.run(
+            [sys.executable, "-m", "alembic", "upgrade", "head"],
+            check=True,
+            cwd=".",
+        )
+    except FileNotFoundError:
+        Base.metadata.create_all(bind=engine)
+    except subprocess.CalledProcessError as exc:
+        raise RuntimeError("Database migrations failed") from exc
 
 
 def get_db():
