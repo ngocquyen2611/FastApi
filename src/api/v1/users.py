@@ -1,12 +1,11 @@
-from argon2 import verify_password
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from src.core.database import get_db
-from src.models.schemas.user import UserLogin, UserRegister, UserOut, Token
-from src.services import user_service
-from src.core.security import create_access_token, verify_password, get_current_user
+from src.core.security import create_access_token, get_current_user, verify_password
+from src.models.schemas.user import Token, UserLogin, UserOut, UserRegister
 from src.models.user import User
+from src.services import user_service
 
 router = APIRouter()
 
@@ -20,6 +19,7 @@ def register(data: UserRegister, db: Session = Depends(get_db)):
     new_user = user_service.create_user(db, data)
     return new_user
 
+
 @router.post("/login", response_model=Token)
 def login(data: UserLogin, db: Session = Depends(get_db)):
     user = user_service.get_user_by_email(db, data.email)
@@ -32,6 +32,7 @@ def login(data: UserLogin, db: Session = Depends(get_db)):
 
     access_token = create_access_token({"sub": user.email})
     return {"access_token": access_token, "token_type": "bearer"}
+
 
 @router.get("/me", response_model=UserOut)
 def read_me(current_user: User = Depends(get_current_user)):
