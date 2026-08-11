@@ -1,10 +1,9 @@
 # services/user_service.py
-from sqlalchemy.orm import Session
-from src.models.user import User, UserDetail
-from src.models.schemas.user import UserRegister
-from src.core.security import hash_password
+from sqlalchemy.orm import Session, joinedload
 
-from sqlalchemy.orm import joinedload
+from src.core.passwords import hash_password
+from src.models.schemas.user import UserRegister
+from src.models.user import User, UserDetail
 
 def get_user_by_email(db: Session, email: str):
     return (
