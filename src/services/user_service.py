@@ -1,9 +1,11 @@
 # services/user_service.py
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload
 
 from src.core.passwords import hash_password
 from src.models.schemas.user import UserRegister
 from src.models.user import User, UserDetail
+
 
 def get_user_by_email(db: Session, email: str):
     return (
@@ -23,7 +25,13 @@ def create_user(db: Session, data: UserRegister):
     user_detail = UserDetail(password=hashed_password, user=user)
     db.add(user)
     db.add(user_detail)
-    db.commit()
+
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise ValueError("Email đã được sử dụng")
+
     db.refresh(user)
     return user
 

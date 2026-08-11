@@ -16,7 +16,11 @@ def register(data: UserRegister, db: Session = Depends(get_db)):
     if existing_user:
         raise HTTPException(status_code=409, detail="Email đã tồn tại")
 
-    new_user = user_service.create_user(db, data)
+    try:
+        new_user = user_service.create_user(db, data)
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail="Email đã tồn tại") from exc
+
     return new_user
 
 
