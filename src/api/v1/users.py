@@ -35,8 +35,19 @@ def login(data: UserLogin, db: Session = Depends(get_db)):
         raise HTTPException(status_code=401, detail="Email hoặc mật khẩu không đúng")
 
     access_token = create_access_token({"sub": user.email})
-    return {"access_token": access_token, "token_type": "bearer"}
+    refresh_token = create_refresh_token({"sub": user.email})
+    return {"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer"}
 
+@router.post("/refresh", response_model=Token)
+def refresh(data: RefreshRequest, db: Session = Depends(get_db)):
+    new_refresh_token, user_id = token_service.rotate_refresh_token(db, data.refresh_token)
+    new_access_token = create_access_token({"sub": str(user_id)})
+ 
+    return {
+        "access_token": new_access_token,
+        "refresh_token": new_refresh_token,
+        "token_type": "bearer",
+    }
 
 @router.get("/me", response_model=UserOut)
 def read_me(current_user: User = Depends(get_current_user)):

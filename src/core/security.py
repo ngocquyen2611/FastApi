@@ -49,3 +49,12 @@ def get_current_user(
         raise credentials_exception
 
     return user
+
+def create_refresh_token(data: dict) -> str:
+    to_encode = data.copy()
+
+    expire = datetime.now(timezone.utc) + timedelta(days=7)
+    to_encode["exp"] = expire
+
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt

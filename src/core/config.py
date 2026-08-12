@@ -8,6 +8,8 @@ class Settings(BaseSettings):
     app_name: str = "my-fastapi-base"
     database_url: str
     secret_key: str = Field(default="")
+    access_token_expire_minutes: int = 30
+    refresh_token_expire_days: int = 7
 
     model_config = SettingsConfigDict(
         env_file=".env",
