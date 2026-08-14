@@ -2,10 +2,10 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from src.core.database import get_db
-from src.core.security import create_access_token, get_current_user, verify_password
-from src.models.schemas.user import Token, UserLogin, UserOut, UserRegister
+from src.core.security import create_access_token, get_current_user, verify_password, create_refresh_token
+from src.models.schemas.user import LogoutRequest, Token, UserLogin, UserOut, UserRegister, RefreshRequest
 from src.models.user import User
-from src.services import user_service
+from src.services import user_service, token_service
 
 router = APIRouter()
 
@@ -35,7 +35,7 @@ def login(data: UserLogin, db: Session = Depends(get_db)):
         raise HTTPException(status_code=401, detail="Email hoặc mật khẩu không đúng")
 
     access_token = create_access_token({"sub": user.email})
-    refresh_token = create_refresh_token({"sub": user.email})
+    refresh_token = token_service.create_refresh_token(db, user.user_id)
     return {"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer"}
 
 @router.post("/refresh", response_model=Token)
@@ -48,6 +48,11 @@ def refresh(data: RefreshRequest, db: Session = Depends(get_db)):
         "refresh_token": new_refresh_token,
         "token_type": "bearer",
     }
+
+@router.post("/logout")
+def logout(data: LogoutRequest, db: Session = Depends(get_db)):
+    token_service.revoke_refresh_token(db, data.refresh_token)
+    return {"detail": "Logged out successfully"}
 
 @router.get("/me", response_model=UserOut)
 def read_me(current_user: User = Depends(get_current_user)):

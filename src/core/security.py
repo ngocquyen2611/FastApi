@@ -1,5 +1,7 @@
 import jwt
 from datetime import datetime, timedelta, timezone
+import secrets
+import hashlib
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
@@ -50,11 +52,20 @@ def get_current_user(
 
     return user
 
-def create_refresh_token(data: dict) -> str:
-    to_encode = data.copy()
 
-    expire = datetime.now(timezone.utc) + timedelta(days=7)
-    to_encode["exp"] = expire
+def generate_refresh_token_pair() -> tuple[str, str, str]:
+    token_id = secrets.token_urlsafe(16)   #ID public
+    raw_secret = secrets.token_urlsafe(32)      # secret private
+    raw_token = f"{token_id}.{raw_secret}"
+    token_hash = hash_refresh_token(raw_secret)     # hash the secret for storage in the database
+    return token_id, raw_token, token_hash
 
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
+def hash_refresh_token(raw_secret: str) -> str:
+    return hashlib.sha256(raw_secret.encode()).hexdigest()
+
+def parse_raw_refresh_token(raw_token: str) -> tuple[str, str]:
+    try: 
+        token_id, raw_secret = raw_token.split(".", 1)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid refresh token")
+    return token_id, raw_secret
