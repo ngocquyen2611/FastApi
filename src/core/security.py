@@ -1,5 +1,7 @@
 import jwt
 from datetime import datetime, timedelta, timezone
+import secrets
+import hashlib
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
@@ -38,14 +40,33 @@ def get_current_user(
 
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        email: str = payload.get("sub")
-        if email is None:
+        sub = payload.get("sub")
+        if sub is None:
             raise credentials_exception
+        user_id = int(sub)
     except PyJWTError:
         raise credentials_exception
 
-    user = src.services.user_service.get_user_by_email(db, email)
+    user = src.services.user_service.get_user_by_id(db, user_id)
     if user is None:
         raise credentials_exception
 
     return user
+
+
+def generate_refresh_token_pair() -> tuple[str, str, str]:
+    token_id = secrets.token_urlsafe(16)   #ID public
+    raw_secret = secrets.token_urlsafe(32)      # secret private
+    raw_token = f"{token_id}.{raw_secret}"
+    token_hash = hash_refresh_token(raw_secret)     # hash the secret for storage in the database
+    return token_id, raw_token, token_hash
+
+def hash_refresh_token(raw_secret: str) -> str:
+    return hashlib.sha256(raw_secret.encode()).hexdigest()
+
+def parse_raw_refresh_token(raw_token: str) -> tuple[str, str]:
+    try: 
+        token_id, raw_secret = raw_token.split(".", 1)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid refresh token")
+    return token_id, raw_secret
