@@ -40,13 +40,14 @@ def get_current_user(
 
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        email: str = payload.get("sub")
-        if email is None:
+        sub = payload.get("sub")
+        if sub is None:
             raise credentials_exception
+        user_id = int(sub)
     except PyJWTError:
         raise credentials_exception
 
-    user = src.services.user_service.get_user_by_email(db, email)
+    user = src.services.user_service.get_user_by_id(db, user_id)
     if user is None:
         raise credentials_exception
 

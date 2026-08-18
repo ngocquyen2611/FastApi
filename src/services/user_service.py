@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session, joinedload
 
 from src.core.passwords import hash_password
 from src.models.schemas.user import UserRegister
-from src.models.user import User, UserDetail
+from src.models.user import User, UserDetail, UserStatus
 
 
 def get_user_by_email(db: Session, email: str):
@@ -21,7 +21,7 @@ def create_user(db: Session, data: UserRegister):
         raise ValueError("Email đã được sử dụng")
 
     hashed_password = hash_password(data.password)
-    user = User(name=data.name, email=data.email)
+    user = User(name=data.name, email=data.email, status=UserStatus.PENDING_VERIFICATION)
     user_detail = UserDetail(password=hashed_password, user=user)
     db.add(user)
     db.add(user_detail)

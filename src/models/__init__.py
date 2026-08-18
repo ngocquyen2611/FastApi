@@ -5,6 +5,8 @@ from src.models.product import Product, ProductCategory, ProductDetail
 from src.models.cart import CartItem
 from src.models.wishlist import WishlistItem
 from src.models.order import Order, OrderDetail
+from src.models.token import RefreshToken
+from src.models.password_reset import PasswordResetToken
 
 __all__ = [
     "Base",
@@ -18,4 +20,6 @@ __all__ = [
     "WishlistItem",
     "Order",
     "OrderDetail",
+    "RefreshToken",
+    "PasswordResetToken",
 ]
